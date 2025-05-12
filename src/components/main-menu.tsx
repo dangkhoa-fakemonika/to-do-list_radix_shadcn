@@ -1,6 +1,7 @@
 import "@radix-ui/themes/styles.css";
 // import * as React from "react"
-import {useEffect, useState} from "react";
+import {useState} from "react";
+import {z as zod} from "zod";
 import {
   Button,
   Checkbox,
@@ -13,9 +14,9 @@ import {
   TextField,
   TextArea,
   Box,
-  Grid as GridLayout, Tooltip
+  Tooltip
 } from "@radix-ui/themes";
-import {Menu, Pencil, Trash} from "lucide-react";
+import {Pencil, Trash} from "lucide-react";
 import { Calendar as CalendarIcon } from "lucide-react"
 import { Calendar } from "@/components/ui/calendar"
 import {
@@ -24,29 +25,27 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover"
 
+const TaskSchema = zod.object({
+  task_id : zod.number().min(0).max(100),
+  task_name : zod.string().min(1).max(20),
+  task_description : zod.string().min(1).max(200),
+  task_date : zod.date(),
+  task_status : zod.boolean(),
+  task_checked : zod.boolean()
+})
 
-interface TaskItem{
-  task_id : number,
-  task_name : string,
-  task_description : string,
-  task_date : Date,
-  task_status : boolean,
-  task_checked : boolean
-}
+type TaskItem = zod.infer<typeof TaskSchema>
 
 function MainMenu () {
   const [myList, setMyList] = useState<TaskItem[]>([]);
-  const [taskName, setTaskName] = useState("");
-  const [taskDescription, setTaskDescription] = useState("");
-  const [taskDate, setTaskDate] = useState<Date>(new Date());
 
-  const addItemToList = () => {
+  const addItemToList = (name : string, description : string, date : Date) => {
     const tempList : TaskItem[] = myList;
     tempList.push({
       task_id : tempList.length,
-      task_name : taskName,
-      task_description : taskDescription,
-      task_date : taskDate,
+      task_name : name,
+      task_description : description,
+      task_date : date,
       task_status : false,
       task_checked : false,
     })
@@ -81,6 +80,7 @@ function MainMenu () {
 
     setMyList(tempList)
   }
+
 
   const selectAllItem = () => {
     const tempList : TaskItem[] = myList
